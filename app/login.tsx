@@ -1,0 +1,137 @@
+import { router } from "expo-router";
+import React, { useState } from 'react';
+import {
+    ActivityIndicator,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from 'react-native';
+import { isLoggedIn, login } from '../api/auth';
+
+export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    try {
+      setError('');
+      setLoading(true);
+      await login(email, password);
+      // user is now logged in
+      // app-level auth state should update here
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Fehler bei der Anmeldung');
+    } finally {
+        if (await isLoggedIn()) {
+            setLoading(false);
+            router.replace({ pathname: "/(tabs)" });
+        }
+      setLoading(false);
+    }
+  };
+
+  return (
+    <View style={styles.screen}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Zimaboard</Text>
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <TextInput
+          placeholder="E-mail"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          style={styles.input}
+        />
+
+        <TextInput
+          placeholder="Passwort"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={styles.input}
+        />
+
+        <Pressable
+          onPress={handleSubmit}
+          disabled={loading}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && !loading && styles.buttonPressed,
+            loading && styles.buttonDisabled,
+          ]}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Anmelden</Text>
+          )}
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#f3f4f6', // gray-100
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#ffffff',
+    padding: 24,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  error: {
+    color: '#dc2626', // red-600
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#d1d5db', // gray-300
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 14,
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: '#2563eb', // blue-600
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  buttonPressed: {
+    backgroundColor: '#1d4ed8', // blue-700
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
