@@ -1,3 +1,4 @@
+import { isLoggedIn, login } from '@/api/auth';
 import { router } from "expo-router";
 import React, { useState } from 'react';
 import {
@@ -8,7 +9,6 @@ import {
     TextInput,
     View,
 } from 'react-native';
-import { isLoggedIn, login } from '../api/auth';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');

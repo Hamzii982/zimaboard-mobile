@@ -3,17 +3,17 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 
 export default function announcement() {
-  return (
-    <View style={styles.container}>
-      <Board type="announcement" />
-    </View>
-  );
+    return (
+        <View style={styles.container}>
+            <Board type="announcement" />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: "#f9fafb",
+        flex: 1,
+        backgroundColor: "#f9fafb",
     },
-  });
+});
   

@@ -91,15 +91,15 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="created"
-        options={{ title: 'Erstellt', href: null }}
+        options={{ title: 'Zugewiesene Nachrichten', href: null }}
       />
       <Tabs.Screen
         name="assigned"
-        options={{ title: 'Zugewiesen', href: null }}
+        options={{ title: 'Meine Nachrichten', href: null }}
       />
       <Tabs.Screen
         name="announcement"
-        options={{ title: 'Ankündigungen', href: null }}
+        options={{ title: 'Pin Wand', href: null }}
       />
       <Tabs.Screen
         name="message/[id]"

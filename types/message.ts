@@ -6,8 +6,9 @@ export interface Message {
     priority: "Niedrig" | "Mittel" | "Hoch";
     status: { name: string; color: string };
     status_id: number;
-    creator: { name: string };
+    creator: { id: number; name: string, department: {id: number, name: string, color: string} };
     assignees: Array<{ id: number; name: string }>;
+    assignee: { id: number; name: string};
     chat_messages: Comment[];
     activities: Activity[];
     attachments: { id: number; url: string; path: string; original_name: string; mime_type: string; size: number }[];

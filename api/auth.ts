@@ -3,22 +3,22 @@ import { router } from 'expo-router';
 import api from "./client";
 
 export const login = async (email: string, password: string) => {
-  const response = await api.post("/login", { email, password });
-  await AsyncStorage.setItem("token", response.data.token);
-  await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
-  return response.data.user;
+    const response = await api.post("/login", { email, password });
+    await AsyncStorage.setItem("token", response.data.token);
+    await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+    return response.data.user;
 };
 
 export const logout = async () => {
-  await AsyncStorage.removeItem("token");
-  await AsyncStorage.removeItem("user");
+    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("user");
   
-  router.replace("/login");
+    router.replace("/login");
 };
 
 export const getUser = async () => {
-  const user = await AsyncStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
+    const user = await AsyncStorage.getItem("user");
+    return user ? JSON.parse(user) : null;
 };
 
 export const isLoggedIn = async () => !!await AsyncStorage.getItem("token");

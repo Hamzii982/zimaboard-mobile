@@ -43,19 +43,19 @@ export default function Dashboard() {
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       <SummaryCard
-        title="Zugewiesen"
+        title="Meine Nachrichten"
         messages={assigned}
         count={assignedCount}
         onPress={() => router.push('/assigned')}
       />
       <SummaryCard
-        title="Erstellt"
+        title="Zugewiesene Nachrichten"
         messages={created}
         count={createdCount}
         onPress={() => router.push('/created')}
       />
       <SummaryCard
-        title="Ankündigungen"
+        title="Pin Wand"
         messages={announcements}
         count={announcementsCount}
         onPress={() => router.push('/announcement')}

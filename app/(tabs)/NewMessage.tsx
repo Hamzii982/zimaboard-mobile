@@ -1,3 +1,4 @@
+import { getUser } from "@/api/auth";
 import api from "@/api/client";
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
@@ -7,11 +8,10 @@ import {
   ActivityIndicator,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 interface MessageStatus {
@@ -36,14 +36,17 @@ export default function NewMessage() {
   const [statusId, setStatusId] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [assignees, setAssignees] = useState<number[]>([]);
+  const [assignee, setAssignee] = useState<number | null>(null);
   const [isAnnouncement, setIsAnnouncement] = useState(false);
   const [attachments, setAttachments] = useState<DocumentPicker.DocumentPickerAsset[]>([]);
   const [statuses, setStatuses] = useState<MessageStatus[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     api.get("/message-statuses").then(res => setStatuses(res.data));
     api.get("/users").then(res => setUsers(res.data.users));
+    getUser().then(user => setCurrentUser(user));
   }, []);
 
   const pickAttachments = async () => {
@@ -55,12 +58,6 @@ export default function NewMessage() {
     if (!result.canceled) {
       setAttachments(prev => [...prev, ...result.assets]);
     }
-  };
-
-  const toggleAssignee = (id: number) => {
-    setAssignees(prev =>
-      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
-    );
   };
 
   const handleSubmit = async () => {
@@ -123,6 +120,8 @@ export default function NewMessage() {
     }
   };
 
+  const excludeUserId = currentUser?.id;
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.heading}>Neue Nachricht</Text>
@@ -156,11 +155,11 @@ export default function NewMessage() {
         </Text>
       ))}
 
-      {/* Announcement */}
+      {/* Announcement
       <View style={styles.row}>
         <Text>Ist eine Ankündigung</Text>
         <Switch value={isAnnouncement} onValueChange={setIsAnnouncement} />
-      </View>
+      </View> */}
 
       {/* Priority */}
       <Text style={styles.label}>Priorität</Text>
@@ -192,21 +191,74 @@ export default function NewMessage() {
         </TouchableOpacity>
       ))}
 
-      {/* Assignees */}
-      <Text style={styles.label}>Empfänger</Text>
-      {users.map(u => (
-        <TouchableOpacity
-          key={u.id}
-          style={styles.row}
-          onPress={() => toggleAssignee(u.id)}
-        >
-          <Ionicons
-            name={assignees.includes(u.id) ? "checkbox" : "square-outline"}
-            size={22}
-          />
-          <Text>{u.name}</Text>
-        </TouchableOpacity>
-      ))}
+      {/* Subscribers */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Abonnenten</Text>
+
+        <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
+          {users
+          .filter(u => u.id !== excludeUserId)
+          .map(u => {
+            const selected = assignees.includes(u.id);
+
+            return (
+            <TouchableOpacity
+                key={u.id}
+                onPress={() =>
+                setAssignees(prev =>
+                    prev.includes(u.id)
+                    ? prev.filter(id => id !== u.id)
+                    : [...prev, u.id]
+                )
+                }
+                style={[
+                styles.assigneeButton,
+                selected && { backgroundColor: "#e0f2fe" },
+                ]}
+            >
+                <Text>{u.name}</Text>
+                {selected && (
+                <Text style={{ color: "#2563eb", fontWeight: "bold" }}>✓</Text>
+                )}
+            </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      {/* Assignee */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Empfänger</Text>
+        <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
+          {users
+              .filter(u => u.id !== excludeUserId)
+              .map(u => {
+                  const selected = assignee === u.id;
+          return (
+              <TouchableOpacity
+              key={u.id}
+              onPress={() =>
+                  setAssignee(selected ? null : u.id)
+              }
+              style={[
+                  styles.assigneeButton,
+                  selected && { backgroundColor: "#dbeafe",
+                      borderColor: "#2563eb", },
+              ]}
+              >
+              <Text 
+                  style = {[
+                      selected && { fontWeight: "600", color: "#1e40af" },
+                    ]}
+              >
+                  {u.name}
+              </Text>
+              {selected && <Text style={{ color: "#2563eb", fontWeight: "bold" }}>✓</Text>}
+              </TouchableOpacity>
+          );
+          })}
+        </ScrollView>
+      </View>
 
       {/* Actions */}
       <View style={styles.actions}>
@@ -227,59 +279,100 @@ export default function NewMessage() {
 }
 
 const styles = StyleSheet.create({
-    container: { padding: 16 },
-    heading: { fontSize: 18, fontWeight: "600", marginBottom: 12 },
-  
-    input: {
-      borderWidth: 1,
-      borderColor: "#d1d5db",
-      borderRadius: 8,
-      padding: 10,
-      marginBottom: 12,
-    },
-  
-    textarea: { height: 100, textAlignVertical: "top" },
-  
-    attachmentBtn: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      marginBottom: 8,
-    },
-  
-    file: { fontSize: 12, color: "#2563eb" },
-  
-    row: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      marginVertical: 4,
-    },
-  
-    label: { marginTop: 12, fontWeight: "600" },
-  
-    option: {
-      padding: 8,
-      borderWidth: 1,
-      borderColor: "#e5e7eb",
-      borderRadius: 6,
-      marginVertical: 4,
-    },
-  
-    optionActive: {
-      backgroundColor: "#dbeafe",
-      borderColor: "#2563eb",
-    },
-  
-    actions: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginTop: 20,
-    },
-  
-    submit: {
-      color: "#2563eb",
-      fontWeight: "600",
-    },
-  });
+  container: { padding: 16 },
+  heading: { fontSize: 18, fontWeight: "600", marginBottom: 12 },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+  },
+
+  textarea: { height: 100, textAlignVertical: "top" },
+
+  attachmentBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+
+  file: { fontSize: 12, color: "#2563eb" },
+
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginVertical: 4,
+  },
+
+  label: { marginTop: 12, fontWeight: "600" },
+
+  option: {
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 6,
+    marginVertical: 4,
+  },
+
+  optionActive: {
+    backgroundColor: "#dbeafe",
+    borderColor: "#2563eb",
+  },
+
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+
+  submit: {
+    color: "#2563eb",
+    fontWeight: "600",
+  },
+  section: { marginBottom: 16 },
+  sectionTitle: { fontWeight: "600", marginBottom: 8 },
+  priorityButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+        borderRadius: 6,
+  },
+  button: {
+        backgroundColor: "#e5e7eb",
+        padding: 10,
+        borderRadius: 6,
+        alignItems: "center",
+        marginBottom: 8,
+  },
+  submitButton: {
+        backgroundColor: "#2563eb",
+        padding: 12,
+        borderRadius: 6,
+        alignItems: "center",
+  },
+  statusButton: {
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+  },
+      
+  assigneeButton: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+        marginBottom: 6,
+  }
+});
   
