@@ -2,7 +2,7 @@ import axios from "axios";
 import { notificationBus } from "./notificationBus";
 
 const api = axios.create({
-    baseURL: "http://localhost:8080/api",
+    baseURL: "https://zimatec-nas1/api",
     headers: {
         Accept: "application/json",
     },
