@@ -2,12 +2,12 @@ import { isLoggedIn, login } from '@/api/auth';
 import { router } from "expo-router";
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 
 export default function LoginScreen() {
