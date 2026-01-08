@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Pusher from "pusher-js/react-native";
+import { Config } from "../config";
 
 let pusher: Pusher | null = null;
 
@@ -8,9 +9,9 @@ export const initPusher = async (userId: number, onMessage: (data: any) => void)
 
     const token = await AsyncStorage.getItem("token");
 
-    pusher = new Pusher("2faa6528d6871c8c8a49", {
+    pusher = new Pusher(Config.PUSHER_APP_KEY!, {
         cluster: "eu",
-        authEndpoint: "http://localhost:8080/api/broadcasting/auth",
+        authEndpoint: `${Config.API_BASE_URL}/broadcasting/auth`,
         auth: {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -18,7 +19,7 @@ export const initPusher = async (userId: number, onMessage: (data: any) => void)
         },
     });
 
-    const channel = pusher.subscribe(`private-user.${userId}`);
+    const channel = pusher.subscribe(`private-${Config.APP_ENV}.user.${userId}`);
 
     channel.bind("message.created", (data: any) => {
         onMessage(data);
