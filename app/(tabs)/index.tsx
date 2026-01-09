@@ -1,3 +1,4 @@
+import { isLoggedIn } from '@/api/auth';
 import api from '@/api/client';
 import SummaryCard from '@/components/SummaryCard';
 import { useFocusEffect } from '@react-navigation/native';
@@ -25,14 +26,18 @@ export default function Dashboard() {
     useCallback(() => {
       const fetchDashboard = async () => {
         try {
-          const res = await api.get('/dashboard');
-          setAssigned(res.data.assigned.latest);
-          setCreated(res.data.created.latest);
-          setAnnouncements(res.data.announcements.latest);
+          // Check if user is logged in
+          const loggedIn = await isLoggedIn();
+          if (!loggedIn) return; // exit if not logged in
 
-          setAssignedCount(res.data.assigned.total);
-          setCreatedCount(res.data.created.total);
-          setAnnouncementsCount(res.data.announcements.total);
+          const res = await api.get('/dashboard');
+          setAssigned(res.data.assigned?.latest ?? []);
+          setCreated(res.data.created?.latest ?? []);
+          setAnnouncements(res.data.announcements?.latest ?? []);
+
+          setAssignedCount(res.data.assigned?.total ?? 0);
+          setCreatedCount(res.data.created?.total ?? 0);
+          setAnnouncementsCount(res.data.announcements?.total ?? 0);
         } catch (err) {
           console.error(err);
         }

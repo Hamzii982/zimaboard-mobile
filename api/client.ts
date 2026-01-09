@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import { Config } from "../config";
 import { notificationBus } from "./notificationBus";
@@ -11,7 +12,7 @@ const api = axios.create({
 
 // Add token automatically if exists
 api.interceptors.request.use(config => {
-    const token = localStorage.getItem("token");
+    const token = AsyncStorage.getItem("token");
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }

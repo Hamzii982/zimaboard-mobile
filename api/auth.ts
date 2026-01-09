@@ -4,6 +4,7 @@ import api from "./client";
 
 export const login = async (email: string, password: string) => {
     const response = await api.post("/login", { email, password });
+    console.log(response);
     await AsyncStorage.setItem("token", response.data.token);
     await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
     return response.data.user;
