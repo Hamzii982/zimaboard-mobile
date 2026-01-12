@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
+import { router } from 'expo-router';
 import { Config } from "../config";
 import { notificationBus } from "./notificationBus";
 
@@ -11,15 +12,30 @@ const api = axios.create({
 });
 
 // Add token automatically if exists
-api.interceptors.request.use(config => {
-    const token = AsyncStorage.getItem("token");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    notificationBus.loading("Wird geladen …");
+api.interceptors.request.use(
+    async config => {
+        const token = await AsyncStorage.getItem("token");
+    
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    
+        notificationBus.loading("Wird geladen …");
+        return config;
+    },
+    error => Promise.reject(error)
+);
 
-    return config;
-});
+api.interceptors.response.use(
+    res => res,
+    async error => {
+      if (error.response?.status === 401) {
+        await AsyncStorage.removeItem("token");
+        router.replace('/login')
+      }
+      return Promise.reject(error);
+    }
+);
 
   /* =========================
    Response interceptor

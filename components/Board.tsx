@@ -73,11 +73,10 @@ export default function Board({ type }: BoardProps) {
             <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 16, gap: 12 }}>
                 
                 {/* Creator Filter */}
-                <View style={{ marginBottom: 8 }}>
+                <View style={{ width: 150, marginBottom: 8 }}>
                     <Text style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Ersteller</Text>
                     <Picker
                         selectedValue={filterCreator ?? ""}
-                        style={{ height: 40, width: 150 }}
                         onValueChange={(value) => setFilterCreator(value || null)}
                     >
                         <Picker.Item label="Alle Ersteller" value="" />
@@ -91,11 +90,10 @@ export default function Board({ type }: BoardProps) {
                 </View>
 
                 {/* Priority Filter */}
-                <View style={{ marginBottom: 8 }}>
+                <View style={{ width: 150, marginBottom: 8 }}>
                     <Text style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Priorität</Text>
                     <Picker
                         selectedValue={filterPriority ?? ""}
-                        style={{ height: 40, width: 150 }}
                         onValueChange={(value) => setFilterPriority(value as any || null)}
                     >
                         <Picker.Item label="Alle Prioritäten" value="" />
@@ -106,11 +104,10 @@ export default function Board({ type }: BoardProps) {
                 </View>
 
                 {/* Status Filter */}
-                <View style={{ marginBottom: 8 }}>
+                <View style={{ width: 150, marginBottom: 8 }}>
                     <Text style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>Status</Text>
                     <Picker
                         selectedValue={filterStatus ?? ""}
-                        style={{ height: 40, width: 150 }}
                         onValueChange={(value) => setFilterStatus(value || null)}
                     >
                         <Picker.Item label="Alle Status" value="" />

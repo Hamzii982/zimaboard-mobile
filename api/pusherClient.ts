@@ -12,6 +12,7 @@ export const initPusher = async (userId: number, onMessage: (data: any) => void)
     pusher = new Pusher(Config.PUSHER_APP_KEY!, {
         cluster: "eu",
         authEndpoint: `${Config.API_BASE_URL}/broadcasting/auth`,
+        forceTLS: false,
         auth: {
         headers: {
             Authorization: `Bearer ${token}`,
