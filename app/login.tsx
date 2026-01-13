@@ -7,14 +7,17 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async () => {
     try {
@@ -50,13 +53,26 @@ export default function LoginScreen() {
           style={styles.input}
         />
 
-        <TextInput
-          placeholder="Passwort"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            placeholder="Passwort"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            style={styles.input}
+          />
+
+          <TouchableOpacity
+            onPress={() => setShowPassword(prev => !prev)}
+            style={styles.iconButton}
+          >
+            <FontAwesome5
+              name={showPassword ? 'eye-slash' : 'eye'}
+              size={20}
+              color="#6b7280"
+            />
+          </TouchableOpacity>
+        </View>
 
         <Pressable
           onPress={handleSubmit}
@@ -133,5 +149,18 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+
+  iconButton: {
+    position: 'absolute',
+    right: 12,
+    top: '35%',
+    transform: [{ translateY: -10 }], // Center vertically
+    padding: 4,
+  },
+
+  passwordContainer: {
+    position: 'relative',
+    width: '100%',
   },
 });

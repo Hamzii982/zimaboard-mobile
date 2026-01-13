@@ -1,6 +1,6 @@
 import { Message } from "@/types/message";
 import * as DocumentPicker from "expo-document-picker";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     ActivityIndicator,
     Modal,
@@ -18,6 +18,7 @@ interface User {
     id: number;
     name: string;
     email: string;
+    department: { id: number; name: string; color: string };
 }
 
 interface MessageStatus {
@@ -154,6 +155,29 @@ export default function NewMessage({ mode, visible, onSaved, onClose, message }:
     // Determine the user to exclude
     const excludeUserId = message?.creator?.id ?? currentUser?.id;
 
+    const selectableUsers = useMemo(
+        () => users.filter(u => u.id !== excludeUserId),
+        [users, excludeUserId]
+    );
+    const selectableUserIds = useMemo(
+        () => selectableUsers.map(u => u.id),
+        [selectableUsers]
+    );
+    const allSelected = useMemo(
+        () => selectableUserIds.every(id => assignees.includes(id)),
+        [selectableUserIds, assignees]
+    );
+    
+    const departments = useMemo(
+        () =>
+          Array.from(
+            new Map(
+            selectableUsers.map(u => [u.department.id, u.department])
+          ).values()
+        ),
+        [selectableUsers]
+    );
+
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
@@ -241,37 +265,89 @@ export default function NewMessage({ mode, visible, onSaved, onClose, message }:
 
                         {/* Subscribers */}
                         <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Abonnenten</Text>
+                            <Text style={styles.sectionTitle}>Abonnenten</Text>
 
-                        <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
-                            {users
-                            .filter(u => u.id !== excludeUserId)
-                            .map(u => {
-                                const selected = assignees.includes(u.id);
+                            {/* Horizontal scrollable buttons for All + Departments */}
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+                                {/* "Alle" button */}
+                                <TouchableOpacity
+                                onPress={() =>
+                                    setAssignees(allSelected ? [] : selectableUserIds)
+                                }
+                                style={[
+                                    styles.groupButton,
+                                    allSelected
+                                    ? styles.groupButtonSelected
+                                    : styles.groupButtonUnselected,
+                                ]}
+                                >
+                                <Text style={allSelected ? styles.groupButtonTextSelected : styles.groupButtonTextUnselected}>Alle</Text>
+                                </TouchableOpacity>
+
+                                {/* Department buttons */}
+                                {departments.map(dep => {
+                                const depUserIds = users
+                                    .filter(u => u.id !== excludeUserId && u.department.id === dep.id)
+                                    .map(u => u.id);
+
+                                const depFullySelected =
+                                    depUserIds.length > 0 &&
+                                    depUserIds.every(id => assignees.includes(id));
 
                                 return (
-                                <TouchableOpacity
-                                    key={u.id}
+                                    <TouchableOpacity
+                                    key={dep.id}
                                     onPress={() =>
-                                    setAssignees(prev =>
-                                        prev.includes(u.id)
-                                        ? prev.filter(id => id !== u.id)
-                                        : [...prev, u.id]
-                                    )
+                                        setAssignees(prev =>
+                                        depFullySelected
+                                            ? prev.filter(id => !depUserIds.includes(id))
+                                            : Array.from(new Set([...prev, ...depUserIds]))
+                                        )
                                     }
                                     style={[
-                                    styles.assigneeButton,
-                                    selected && { backgroundColor: "#e0f2fe" },
+                                        styles.groupButton,
+                                        depFullySelected
+                                        ? { backgroundColor: dep.color, borderColor: dep.color }
+                                        : { borderColor: dep.color },
                                     ]}
-                                >
-                                    <Text>{u.name}</Text>
-                                    {selected && (
-                                    <Text style={{ color: "#2563eb", fontWeight: "bold" }}>✓</Text>
-                                    )}
-                                </TouchableOpacity>
+                                    >
+                                    <Text style={depFullySelected ? { color: "#fff" } : { color: dep.color }}>
+                                        {dep.name}
+                                    </Text>
+                                    </TouchableOpacity>
                                 );
-                            })}
-                        </ScrollView>
+                                })}
+                            </ScrollView>
+
+                            <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
+                                {users
+                                .filter(u => u.id !== excludeUserId)
+                                .map(u => {
+                                    const selected = assignees.includes(u.id);
+
+                                    return (
+                                    <TouchableOpacity
+                                        key={u.id}
+                                        onPress={() =>
+                                        setAssignees(prev =>
+                                            prev.includes(u.id)
+                                            ? prev.filter(id => id !== u.id)
+                                            : [...prev, u.id]
+                                        )
+                                        }
+                                        style={[
+                                        styles.assigneeButton,
+                                        selected && { backgroundColor: "#e0f2fe" },
+                                        ]}
+                                    >
+                                        <Text>{u.name}</Text>
+                                        {selected && (
+                                        <Text style={{ color: "#2563eb", fontWeight: "bold" }}>✓</Text>
+                                        )}
+                                    </TouchableOpacity>
+                                    );
+                                })}
+                            </ScrollView>
                         </View>
 
                         {/* Assignee */}
@@ -412,5 +488,31 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#d1d5db",
         marginBottom: 6,
-    }
+    },
+
+    groupButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        borderWidth: 1,
+        marginRight: 8,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    groupButtonSelected: {
+        backgroundColor: "#2563eb",
+        borderColor: "#2563eb",
+    },
+    groupButtonUnselected: {
+        backgroundColor: "#fff",
+        borderColor: "#2563eb",
+    },
+    groupButtonTextSelected: {
+        color: "#fff",
+        fontSize: 12,
+    },
+    groupButtonTextUnselected: {
+        color: "#2563eb",
+        fontSize: 12,
+    },
 });

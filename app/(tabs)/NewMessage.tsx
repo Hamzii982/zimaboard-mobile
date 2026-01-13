@@ -3,7 +3,7 @@ import api from "@/api/client";
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -23,6 +23,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  department: { id: number; name: string; color: string };
 }
 
 type Priority = "Niedrig" | "Mittel" | "Hoch";
@@ -122,6 +123,29 @@ export default function NewMessage() {
 
   const excludeUserId = currentUser?.id;
 
+  const selectableUsers = useMemo(
+    () => users.filter(u => u.id !== excludeUserId),
+    [users, excludeUserId]
+  );
+  const selectableUserIds = useMemo(
+    () => selectableUsers.map(u => u.id),
+    [selectableUsers]
+  );
+  const allSelected = useMemo(
+    () => selectableUserIds.every(id => assignees.includes(id)),
+    [selectableUserIds, assignees]
+  );
+  
+  const departments = useMemo(
+    () =>
+      Array.from(
+        new Map(
+        selectableUsers.map(u => [u.department.id, u.department])
+      ).values()
+    ),
+    [selectableUsers]
+  );
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.heading}>Neue Nachricht</Text>
@@ -194,6 +218,58 @@ export default function NewMessage() {
       {/* Subscribers */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Abonnenten</Text>
+
+        {/* Horizontal scrollable buttons for All + Departments */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+            {/* "Alle" button */}
+            <TouchableOpacity
+            onPress={() =>
+                setAssignees(allSelected ? [] : selectableUserIds)
+            }
+            style={[
+                styles.groupButton,
+                allSelected
+                ? styles.groupButtonSelected
+                : styles.groupButtonUnselected,
+            ]}
+            >
+            <Text style={allSelected ? styles.groupButtonTextSelected : styles.groupButtonTextUnselected}>Alle</Text>
+            </TouchableOpacity>
+
+            {/* Department buttons */}
+            {departments.map(dep => {
+            const depUserIds = users
+                .filter(u => u.id !== excludeUserId && u.department.id === dep.id)
+                .map(u => u.id);
+
+            const depFullySelected =
+                depUserIds.length > 0 &&
+                depUserIds.every(id => assignees.includes(id));
+
+            return (
+                <TouchableOpacity
+                key={dep.id}
+                onPress={() =>
+                    setAssignees(prev =>
+                    depFullySelected
+                        ? prev.filter(id => !depUserIds.includes(id))
+                        : Array.from(new Set([...prev, ...depUserIds]))
+                    )
+                }
+                style={[
+                    styles.groupButton,
+                    depFullySelected
+                    ? { backgroundColor: dep.color, borderColor: dep.color }
+                    : { borderColor: dep.color },
+                ]}
+                >
+                <Text style={depFullySelected ? { color: "#fff" } : { color: dep.color }}>
+                    {dep.name}
+                </Text>
+                </TouchableOpacity>
+            );
+            })}
+        </ScrollView>
 
         <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
           {users
@@ -373,6 +449,32 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#d1d5db",
         marginBottom: 6,
-  }
+  },
+
+  groupButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginRight: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  groupButtonSelected: {
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb",
+  },
+  groupButtonUnselected: {
+    backgroundColor: "#fff",
+    borderColor: "#2563eb",
+  },
+  groupButtonTextSelected: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  groupButtonTextUnselected: {
+    color: "#2563eb",
+    fontSize: 12,
+  },
 });
   

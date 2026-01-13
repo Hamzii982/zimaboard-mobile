@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 type Message = {
@@ -70,11 +70,10 @@ export default function SummaryCard({ title, messages, count, onPress }: Summary
             {messages.length === 0 ? (
                 <Text style={{ color: '#6b7280' }}>Keine neuen Nachrichten</Text>
             ) : (
-                <FlatList
-                    data={messages}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
+                <View>
+                    {messages.map(item => (
                         <TouchableOpacity
+                        key={item.id}
                         style={{
                             flexDirection: 'row',
                             justifyContent: 'space-between',
@@ -108,8 +107,8 @@ export default function SummaryCard({ title, messages, count, onPress }: Summary
                             <Text style={{ fontSize: 12, color: '#6b7280' }}>{item.creator.name}</Text>
                         </View>
                         </TouchableOpacity>
-                    )}
-                />
+                    ))}
+                </View>
             )}
 
             <Text style={{ marginTop: 8, fontWeight: 'bold', color: '#3b82f6' }}>
