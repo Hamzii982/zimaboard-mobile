@@ -84,7 +84,7 @@ export default function LoginScreen() {
           ]}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator size="large" color="#000" />
           ) : (
             <Text style={styles.buttonText}>Anmelden</Text>
           )}

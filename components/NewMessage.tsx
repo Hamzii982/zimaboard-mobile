@@ -410,7 +410,7 @@ export default function NewMessage({ mode, visible, onSaved, onClose, message }:
                         disabled={loading}
                         style={styles.submitButton}
                         >
-                        {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white">Speichern</Text>}
+                        {loading ? <ActivityIndicator size="large" color="#000" /> : <Text className="text-white">Speichern</Text>}
                         </TouchableOpacity>
                     </ScrollView>
                 </View>

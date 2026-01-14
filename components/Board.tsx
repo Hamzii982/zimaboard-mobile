@@ -1,8 +1,9 @@
 import { Message } from '@/types/message';
 import { Picker } from "@react-native-picker/picker";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    RefreshControl,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -29,6 +30,7 @@ export default function Board({ type }: BoardProps) {
     const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [shareMessage, setShareMessage] = useState<Message | null>(null);
+    const [refreshing, setRefreshing] = useState(false);
 
     const fetchBoard = async () => {
         setLoading(true);
@@ -47,27 +49,42 @@ export default function Board({ type }: BoardProps) {
         }
     };
 
-    useEffect(() => {
-        const fetchDepartments = async () => {
+    const fetchDepartments = async () => {
         try {
             const res = await api.get("/departments");
             setDepartments(res.data);
         } catch (err) {
             console.error(err);
         }
-        };
+    };
+
+    useEffect(() => {
         fetchDepartments();
         fetchBoard();
     }, [type, filterArchived, filterCreator, filterPriority, filterStatus]);
 
     const messagesByDept = (dept: string) =>
         messages.filter((msg) => msg.creator?.department?.name === dept);
+    
+    const reloadData = useCallback( () => {
+        setRefreshing(true);
+    
+        // fetch / refetch your data here
+        fetchDepartments();
+        fetchBoard();
+    
+        setRefreshing(false);
+    }, []);
 
-    if (loading) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
-//   if (messages.length === 0) return <Text style={{ padding: 16 }}>Kein {type} Nachrichten verfügbar.</Text>;
+    if (loading) return <ActivityIndicator size="large" color="#000" style={{ flex: 1 }} />;
 
     return (
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <ScrollView 
+            contentContainerStyle={{ padding: 16 }}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={reloadData} />
+            }    
+        >
             
             {/* Filters */}
             <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 16, gap: 12 }}>
@@ -133,7 +150,7 @@ export default function Board({ type }: BoardProps) {
                 }}
                 >
                     <Icon name="trash" size={16} color="#fff" />
-                    <Text style={{ color: "#fff", marginLeft: 6 }}>{filterArchived ? "Archiviert" : "Nicht archiviert"}</Text>
+                    <Text style={{ color: "#fff", marginLeft: 6 }}>{filterArchived ? "Archiv" : "Archiv"}</Text>
                 </TouchableOpacity>
             </View>
 

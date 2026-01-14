@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Pressable, StyleSheet, Text } from "react-native";
 
 interface UserCircleProps {
   user?: { name?: string };
@@ -8,58 +8,71 @@ interface UserCircleProps {
 }
 
 const UserCircle = ({ user, color, size = "md" }: UserCircleProps) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-
   const circleSize = size === "sm" ? 28 : 36;
   const fontSize = size === "sm" ? 12 : 14;
 
+  const [expanded, setExpanded] = useState(false);
+
+  // Animated width for expanding circle
+  const animatedWidth = React.useRef(new Animated.Value(circleSize)).current;
+
+  const handlePressIn = () => {
+    setExpanded(true);
+    Animated.timing(animatedWidth, {
+      toValue: 140, // expand width to fit name
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    setExpanded(false);
+    Animated.timing(animatedWidth, {
+      toValue: circleSize,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const displayText = expanded ? user?.name || "?" : user?.name?.charAt(0).toUpperCase() || "?";
+
   return (
     <Pressable
-      onPressIn={() => setShowTooltip(true)}
-      onPressOut={() => setShowTooltip(false)}
-      style={{ marginHorizontal: 4, alignItems: "center" }}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={{ marginHorizontal: 4 }}
     >
-      {/* Circle */}
-      <View
+      <Animated.View
         style={[
+          styles.circle,
           {
-            width: circleSize,
+            width: animatedWidth,
             height: circleSize,
             borderRadius: circleSize / 2,
             backgroundColor: color,
             justifyContent: "center",
-            alignItems: "center",
+            paddingHorizontal: expanded ? 10 : 0, // padding when expanded
           },
         ]}
       >
-        <Text style={{ color: "#fff", fontWeight: "600", fontSize }}>
-          {user?.name?.charAt(0).toUpperCase() || "?"}
+        <Text
+          style={[
+            { color: "#fff", fontWeight: "600", fontSize },
+            expanded && { textAlign: "center" },
+          ]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {displayText}
         </Text>
-      </View>
-
-      {/* Tooltip */}
-      {showTooltip && (
-        <View style={styles.tooltip}>
-          <Text style={styles.tooltipText}>{user?.name}</Text>
-        </View>
-      )}
+      </Animated.View>
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
-  tooltip: {
-    position: "absolute",
-    bottom: 36, // above the circle
-    backgroundColor: "black",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    zIndex: 10,
-  },
-  tooltipText: {
-    color: "white",
-    fontSize: 12,
+  circle: {
+    alignItems: "center",
   },
 });
 

@@ -61,6 +61,17 @@ export default function NewMessage() {
     }
   };
 
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setPriority("Mittel");
+    setStatusId(null);
+    setIsAnnouncement(false);
+    setAssignees([]);
+    setAssignee(null);
+    setAttachments([]);
+  };
+
   const handleSubmit = async () => {
     if (!title || !description || !statusId) return;
 
@@ -75,6 +86,7 @@ export default function NewMessage() {
         status_id: statusId,
         is_announcement: isAnnouncement,
         assignees,
+        assignee,
       });
 
       const messageId = res.data.data.id;
@@ -112,6 +124,7 @@ export default function NewMessage() {
         )
       );
 
+      resetForm();
       router.back();
     } catch (err) {
       console.error(err);
@@ -346,7 +359,7 @@ export default function NewMessage() {
 
       <TouchableOpacity onPress={handleSubmit} disabled={loading}>
         {loading ? (
-          <ActivityIndicator />
+          <ActivityIndicator size="large" color="#000" />
         ) : (
           <Text style={styles.submit}>Nachricht erstellen</Text>
         )}

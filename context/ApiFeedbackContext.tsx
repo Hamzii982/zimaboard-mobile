@@ -45,7 +45,7 @@ export const ApiFeedbackProvider = ({ children }: { children: React.ReactNode })
       {children}
       {message && (
         <View style={[styles.container, message.type === "success" ? styles.success : message.type === "error" ? styles.error : styles.loading]}>
-          {message.type === "loading" && <ActivityIndicator color="white" style={{ marginRight: 8 }} />}
+          {message.type === "loading" && <ActivityIndicator size="large" color="#000" style={{ marginRight: 8 }} />}
           <Text style={styles.text}>{message.text}</Text>
         </View>
       )}

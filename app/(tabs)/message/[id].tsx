@@ -111,7 +111,7 @@ export default function MessageDetail() {
     if (!message) { 
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" />
+                <ActivityIndicator size="large" color="#000" />
             </View>
         )
     };
@@ -160,7 +160,7 @@ export default function MessageDetail() {
     if (loading) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" />
+                <ActivityIndicator size="large" color="#000" />
             </View>
         );
     }
@@ -317,7 +317,7 @@ export default function MessageDetail() {
                 {message.assignees?.length > 0 && (
                     <>
                     <Text style={[styles.sectionTitle, { marginTop: 12 }]}>Abonnenten</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 4 }}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 4, }}>
                         {message.assignees.map(u => (
                         <UserCircle
                             key={u.id}

@@ -119,7 +119,7 @@ export default function ShareModal({ message, isOpen, onClose, onShareSuccess }:
                             }
                             disabled={loading}
                             >
-                            {loading ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#fff" }}>Teilen</Text>}
+                            {loading ? <ActivityIndicator size="large" color="#000" /> : <Text style={{ color: "#fff" }}>Teilen</Text>}
                         </TouchableOpacity>
                     </View>
                 </View>
