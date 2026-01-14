@@ -1,5 +1,6 @@
 import { router, Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { getUser, isLoggedIn } from '@/api/auth';
 // import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -12,6 +13,7 @@ import { View } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
   const [userId, setUserId] = useState<number | null>(null);
   const { addNotification } = useNotifications();
   const colorScheme = useColorScheme();
@@ -58,7 +60,7 @@ export default function TabLayout() {
         headerStyle: { backgroundColor: '#25292e' },
         headerTintColor: '#fff',
         headerShadowVisible: false,
-        tabBarStyle: { backgroundColor: '#25292e', paddingBottom: 5, height: 60 },
+        tabBarStyle: { backgroundColor: '#25292e', height: 56 + insets.bottom, paddingBottom: insets.bottom, },
         tabBarLabelStyle: { fontSize: 12 },
         headerRight: () => (
           <View style={{ marginRight: 16 }}>

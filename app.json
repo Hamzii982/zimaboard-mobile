@@ -18,7 +18,7 @@
         "backgroundImage": "./assets/images/zimmermann-logo-192.png",
         "monochromeImage": "./assets/images/zimmermann-logo-192.png"
       },
-      "edgeToEdgeEnabled": true,
+      "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
       "package": "com.hamzamehmood777.zimaboardmobile"
     },

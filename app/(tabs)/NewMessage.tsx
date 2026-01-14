@@ -147,6 +147,7 @@ export default function NewMessage() {
   );
 
   return (
+    <>
     <ScrollView style={styles.container}>
       <Text style={styles.heading}>Neue Nachricht</Text>
 
@@ -335,22 +336,23 @@ export default function NewMessage() {
           })}
         </ScrollView>
       </View>
-
-      {/* Actions */}
-      <View style={styles.actions}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text>Abbrechen</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleSubmit} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator />
-          ) : (
-            <Text style={styles.submit}>Nachricht erstellen</Text>
-          )}
-        </TouchableOpacity>
-      </View>
     </ScrollView>
+
+    {/* Actions */}
+    <View style={styles.actions}>
+      <TouchableOpacity onPress={() => router.back()}>
+        <Text>Abbrechen</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleSubmit} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator />
+        ) : (
+          <Text style={styles.submit}>Nachricht erstellen</Text>
+        )}
+      </TouchableOpacity>
+    </View>
+    </>
   );
 }
 
@@ -402,7 +404,10 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    padding: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    backgroundColor: "#fff",
   },
 
   submit: {

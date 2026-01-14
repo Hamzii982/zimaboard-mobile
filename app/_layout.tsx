@@ -1,4 +1,5 @@
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import * as NavigationBar from "expo-navigation-bar";
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
@@ -52,6 +53,12 @@ export default function RootLayout() {
     };
     checkAuth();
   }, []);
+
+  useEffect(() => {
+  NavigationBar.setPositionAsync("relative");
+  NavigationBar.setBackgroundColorAsync("#ffffff");
+  NavigationBar.setButtonStyleAsync("dark");
+}, []);
 
   if (loading) return null;
 

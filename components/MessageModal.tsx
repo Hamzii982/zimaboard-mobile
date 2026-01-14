@@ -34,12 +34,6 @@ type Props = {
     onAddComment: (text: string) => Promise<Comment> | Comment;
 };
 
-interface AssignToMeProps {
-    message: any; // your message object type
-    assignee: number | null;
-    setAssignee: (id: number | null) => void;
-}
-
 export default function MessageModal({ message, onClose, onArchiveToggle, onAddComment }: Props) {
     const [chatMessages, setChatMessages] = useState<Comment[]>(message.chat_messages || []);
     const [newComment, setNewComment] = useState("");
@@ -55,40 +49,40 @@ export default function MessageModal({ message, onClose, onArchiveToggle, onAddC
         
     // Fetch current user once
     useEffect(() => {
-    const fetchUser = async () => {
-        const u = await getUser();
-        if (u?.id) {
-        setUser(u);
-        // Initialize toggle based on message.assignee
-        setAssignedToMe(message.assignee?.id === u.id);
-        }
-    };
-    fetchUser();
+        const fetchUser = async () => {
+            const u = await getUser();
+            if (u?.id) {
+            setUser(u);
+            // Initialize toggle based on message.assignee
+            setAssignedToMe(message.assignee?.id === u.id);
+            }
+        };
+        fetchUser();
     }, [message.assignee?.id]);
 
     // Keep toggle in sync if assignee changes
     useEffect(() => {
-    if (user) {
-        setAssignedToMe(assignee === user.id);
-    }
+        if (user) {
+            setAssignedToMe(assignee === user.id);
+        }
     }, [assignee, user]);
       
-        const onAssignToMeToggle = async (value: boolean) => {
-            if (!user) return;
+    const onAssignToMeToggle = async (value: boolean) => {
+        if (!user) return;
             setAssignedToMe(value);
       
-          try {
+        try {
             await api.put(`/messages/${message.id}/assign-to-me`, {
               assigned_to: value ? user.id : null,
             });
       
             // Update assignee locally
             setAssignee(value ? user.id : null);
-          } catch (error) {
+        } catch (error) {
             console.error("Assign failed:", error);
             // Revert toggle if API fails
             setAssignedToMe(!value);
-          }
+        }
     };
 
     useEffect(() => {
@@ -238,8 +232,8 @@ export default function MessageModal({ message, onClose, onArchiveToggle, onAddC
                                 onChangeText={setNewComment}
                                 placeholder="Kommentar hinzufügen..."
                                 />
-                                <TouchableOpacity onPress={handleAddComment} style={styles.button} disabled={loading}>
-                                <Text style={{ color: "#fff" }}>{loading ? "Senden..." : "Senden"}</Text>
+                                <TouchableOpacity onPress={handleAddComment} style={[styles.button, loading && { opacity: 0.7 }]} disabled={loading}>
+                                    <Ionicons name="send" size={24} color="#2563eb" />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -347,7 +341,7 @@ const styles = StyleSheet.create({
     section: { marginBottom: 12 },
     sectionTitle: { fontWeight: "bold", marginBottom: 4 },
     input: { flex: 1, borderWidth: 1, borderColor: "#d1d5db", borderRadius: 6, paddingHorizontal: 8, height: 36 },
-    button: { backgroundColor: "#2563eb", paddingHorizontal: 12, justifyContent: "center", borderRadius: 6 },
+    button: { padding: 5},
     container: {
         flexDirection: "row",
         alignItems: "center",

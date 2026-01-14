@@ -1,3 +1,4 @@
+import { getUser } from "@/api/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -13,7 +14,6 @@ import {
     View,
 } from "react-native";
 
-import { getUser } from "@/api/auth";
 import api from "@/api/client";
 import NewMessage from "@/components/NewMessage";
 import UserCircle from "@/components/UserCircle";
@@ -35,7 +35,6 @@ export default function MessageDetail() {
     const [newComment, setNewComment] = useState("");
     const [loading, setLoading] = useState(true);
     const [editModal, setEditModal] = useState(false);
-    const [userId, setUserId] = useState<number | null>(null);
 
     const scrollRef = useRef<ScrollView>(null);
 
@@ -60,16 +59,18 @@ export default function MessageDetail() {
         fetchMessage();
     }, [id]);
 
-    // Get user ID once
+    // Fetch current user once
     useEffect(() => {
-        const fetchUser = async () => {
-            const user = await getUser();
-            if (user?.id) {
-                setUserId(user.id);
-            }
-        };
-        fetchUser();
-    }, []);
+            const fetchUser = async () => {
+                const u = await getUser();
+                if (u?.id) {
+                setUser(u);
+                // Initialize toggle based on message.assignee
+                setAssignedToMe(message?.assignee?.id === u.id);
+                }
+            };
+            fetchUser();
+    }, [message?.assignee?.id]);
 
     // Update assignee when message loads
     useEffect(() => {
@@ -82,25 +83,25 @@ export default function MessageDetail() {
 
     // Keep assignedToMe toggle in sync
     useEffect(() => {
-    if (user) {
-        setAssignedToMe(assignee === user.id);
-    }
+        if (user) {
+            setAssignedToMe(assignee === user.id);
+        }
     }, [assignee, user]);
 
     // Toggle handler
     const onAssignToMeToggle = async (value: boolean) => {
-    if (!user || !message) return;
+        if (!user || !message) return;
 
-    setAssignedToMe(value);
-    try {
-        await api.put(`/messages/${message.id}/assign-to-me`, {
-        assigned_to: value ? user.id : null,
-        });
-        setAssignee(value ? user.id : null);
-    } catch (err) {
-        console.error("Assign failed:", err);
-        setAssignedToMe(!value); // revert if API fails
-    }
+        setAssignedToMe(value);
+        try {
+            await api.put(`/messages/${message.id}/assign-to-me`, {
+            assigned_to: value ? user.id : null,
+            });
+            setAssignee(value ? user.id : null);
+        } catch (err) {
+            console.error("Assign failed:", err);
+            setAssignedToMe(!value); // revert if API fails
+        }
     };
 
     useEffect(() => {
@@ -124,22 +125,23 @@ export default function MessageDetail() {
 
     const handleAddComment = async () => {
         if (!newComment.trim()) return;
-
+        setLoading(true);
         try {
             const res = await api.post(`/messages/${message?.id}/comments`, {
                 text: newComment,
-        });
+            });
 
-        setMessage(prev =>
-            prev
-            ? { ...prev, chat_messages: [...prev.chat_messages, res.data.data] }
-            : prev
-        );
+            setMessage(prev =>
+                prev
+                ? { ...prev, chat_messages: [...prev.chat_messages, res.data.data] }
+                : prev
+            );
 
-        setNewComment("");
+            setNewComment("");
         } catch (err) {
             console.error(err);
         }
+        setLoading(false);
     };
 
     const handleMessageSaved = (updated: Message) => {
@@ -264,7 +266,7 @@ export default function MessageDetail() {
                     onChangeText={setNewComment}
                     style={styles.input}
                 />
-                <TouchableOpacity onPress={handleAddComment}>
+                <TouchableOpacity onPress={handleAddComment} style={[loading && { opacity: 0.7 }]} disabled={loading}>
                     <Ionicons name="send" size={24} color="#2563eb" />
                 </TouchableOpacity>
                 </View>
